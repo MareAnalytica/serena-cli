@@ -24,6 +24,7 @@ DEFAULT_SERVER_CMD = "uvx"
 def _build_server_args(project_path: str) -> list[str]:
     """Build server args for the Serena MCP server."""
     return [
+        "--from", "serena-agent",
         "serena",
         "start-mcp-server",
         "--project",
@@ -138,7 +139,7 @@ def find_symbol(
     return _tool(
         "find_symbol",
         project_path,
-        name_path_pattern=name_path_pattern,
+        name_path=name_path_pattern,
         depth=depth,
         include_body=include_body if include_body else None,
         include_info=include_info if include_info else None,
@@ -159,7 +160,7 @@ def find_referencing_symbols(
     return _tool(
         "find_referencing_symbols",
         project_path,
-        name_path_pattern=name_path_pattern,
+        name_path=name_path_pattern,
         include_body=include_body if include_body else None,
         include_info=include_info if include_info else None,
         max_matches=max_matches,
@@ -189,7 +190,7 @@ def rename_symbol(
     return _tool(
         "rename_symbol",
         project_path,
-        name_path_pattern=name_path_pattern,
+        name_path=name_path_pattern,
         new_name=new_name,
     )
 
