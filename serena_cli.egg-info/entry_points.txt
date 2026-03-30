@@ -1,0 +1,2 @@
+[console_scripts]
+serena = cli_anything.serena.serena_cli:main
