@@ -152,18 +152,16 @@ def find_symbol(
 def find_referencing_symbols(
     project_path: str,
     name_path_pattern: str,
-    include_body: bool = False,
-    include_info: bool = False,
-    max_matches: Optional[int] = None,
+    relative_path: Optional[str] = None,
+    max_answer_chars: Optional[int] = None,
 ) -> Any:
     """Find all symbols that reference a given symbol."""
     return _tool(
         "find_referencing_symbols",
         project_path,
         name_path=name_path_pattern,
-        include_body=include_body if include_body else None,
-        include_info=include_info if include_info else None,
-        max_matches=max_matches,
+        relative_path=relative_path,
+        max_answer_chars=max_answer_chars,
     )
 
 
@@ -258,7 +256,7 @@ def write_memory(
     return _tool(
         "write_memory",
         project_path,
-        name=name,
+        memory_name=name,
         content=content,
     )
 
@@ -271,19 +269,17 @@ def read_memory(
     return _tool(
         "read_memory",
         project_path,
-        name=name,
+        memory_file_name=name,
     )
 
 
 def list_memories(
     project_path: str,
-    topic: Optional[str] = None,
 ) -> Any:
     """List available memories."""
     return _tool(
         "list_memories",
         project_path,
-        topic=topic,
     )
 
 
@@ -295,7 +291,7 @@ def delete_memory(
     return _tool(
         "delete_memory",
         project_path,
-        name=name,
+        memory_file_name=name,
     )
 
 
@@ -310,13 +306,17 @@ def activate_project(
     return _tool(
         "activate_project",
         project_path,
-        project_name_or_path=project_name_or_path or project_path,
+        project=project_name_or_path or project_path,
     )
 
 
 def get_current_config(project_path: str) -> Any:
-    """Get active project configuration."""
-    return _tool("get_current_config", project_path)
+    """Get active project configuration by reading the config file."""
+    config_path = os.path.join(os.path.expanduser("~"), ".serena", "serena_config.yml")
+    if os.path.exists(config_path):
+        with open(config_path) as f:
+            return f.read()
+    return f"No Serena config found at {config_path}"
 
 
 def onboarding(project_path: str) -> Any:
@@ -330,8 +330,12 @@ def check_onboarding_performed(project_path: str) -> Any:
 
 
 def restart_language_server(project_path: str) -> Any:
-    """Restart the language server to refresh code intelligence."""
-    return _tool("restart_language_server", project_path)
+    """Restart the language server by re-activating the project.
+
+    Each CLI invocation spawns a fresh MCP server + language server,
+    so activating the project is sufficient to get a fresh LS instance.
+    """
+    return _tool("activate_project", project_path, project=project_path)
 
 
 # -- Editing Tools (exposed but discouraged -- use Claude Code Edit instead) --

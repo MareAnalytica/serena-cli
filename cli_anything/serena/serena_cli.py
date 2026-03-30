@@ -177,22 +177,19 @@ def cmd_find(pattern, depth, body, info, kind, substring, max_matches):
 
 @cli.command("refs")
 @click.argument("pattern")
-@click.option("--body", is_flag=True, help="Include referencing symbol body")
-@click.option("--info", is_flag=True, help="Include hover/type info")
-@click.option("--max", "max_matches", type=int, default=None, help="Max results")
+@click.option("--path", "relative_path", default=None, help="Restrict to file (relative path, required)")
 @handle_error
-def cmd_refs(pattern, body, info, max_matches):
+def cmd_refs(pattern, relative_path):
     """Find all references to a symbol.
 
     Shows every location where the symbol is used across the codebase.
+    Requires --path to specify the file containing the symbol.
     """
     sess = get_session()
     result = backend.find_referencing_symbols(
         project_path=sess.project_path,
         name_path_pattern=pattern,
-        include_body=body,
-        include_info=info,
-        max_matches=max_matches,
+        relative_path=relative_path,
     )
     sess.last_result = result
     output(result)
@@ -332,14 +329,12 @@ def memory_read(name):
 
 
 @memory.command("list")
-@click.option("--topic", default=None, help="Filter by topic")
 @handle_error
-def memory_list(topic):
+def memory_list():
     """List available project memories."""
     sess = get_session()
     result = backend.list_memories(
         project_path=sess.project_path,
-        topic=topic,
     )
     sess.last_result = result
     output(result)
